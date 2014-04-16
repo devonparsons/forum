@@ -1,0 +1,18 @@
+<?php
+
+class User {
+
+  var $submitted_username;
+
+  function login () {
+
+  }
+
+  function test ()  {
+
+    echo "\n testing user test";
+  }
+
+}
+
+?>
