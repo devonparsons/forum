@@ -10,12 +10,15 @@ class User {
 
     if ($verified) {
       echon("User verified! Logging in.");
+      $_SESSION['logged_in'] = true;
     } else {
       echon("User not verified! Not logging in.");
+      $_SESSION['logged_in'] = false;
     }
   }
 
-  function get_user_from_db($username, $connection){
+  function get_user_from_db($username){
+
     echon("function: User->get_user_from_db");
 
     $user_statement = $connection->prepare("SELECT * FROM users WHERE username=?");
@@ -28,8 +31,9 @@ class User {
 
   }
 
-  function get_secured_password($username, $connection){
+/*  function get_secured_password($username){
 
+    $connection = Database::get_database();
     echon("function: User->get_secured_password");
     echon("username to retrieve password of: $username");
 
@@ -40,7 +44,7 @@ class User {
     $password_statement->fetch();
 
     echon("password: " . $secure_password );
-    }
+    }*/
 
   function verify_user($user, $plaintext_password){
     echon("function: User->verify_user");
@@ -50,24 +54,12 @@ class User {
     return $verified;
   }
 
-  function set_password($username, $plaintext_password, $connection){
+  function set_password($username, $plaintext_password){
     echon("function: User->set_password");
     echon("username to update is " . $username);
 
     $secure_password = $this->encrypt_password($plaintext_password);
-
-
-    $update_password_statement = $connection->prepare("UPDATE users SET password=? WHERE username=?");
-
-    if(!$update_password_statement){
-      echon("failed to update password; dying;");
-      printf('errno: %d, error: %s', $connection->errno, $connection->error);
-
-      die;
-    }
-
-    $update_password_statement->bind_param('ss', $secure_password, $username);
-    $update_password_statement->execute();
+    Database::set_field("users", array("password"=>$secure_password),array("username"=>$username));
 
     $this->get_secured_password($username, $connection);
   }
